@@ -101,6 +101,13 @@ public class GWindow extends Frame implements GConstants, GConstantsInternal {
 	/** the name of the method to handle the event */ 
 	protected String postHandlerMethodName;
 
+	/** The object to handle the window closing event */
+	protected Object closeHandlerObject = null;
+	/** The method in closeHandlerObject to execute */
+	protected Method closetHandlerMethod = null;
+	/** the name of the method to handle the event */ 
+	protected String closetHandlerMethodName;
+
 	/**
 	 * Create a window that can be used to hold G4P components or used
 	 * for drawing or both together.
@@ -207,6 +214,49 @@ public class GWindow extends Frame implements GConstants, GConstantsInternal {
 		G4P.addWindow(this);
 	}
 
+	/**
+	 * Attempt to create the on-close-window event handler for this GWindow. 
+	 * The default event handler is a method that returns void and has a single
+	 * parameter of type GWindow (this will be a reference to the window that is
+	 * closing) <br/>
+	 * 
+	 * The handler will <b>not be called</> if the setActionOnClose flag is set 
+	 * to EXIT_APP <br/>
+	 * If the flag is set to CLOSE_WINDOW then the handler is called when the window
+	 * is closed by clicking on the window-close-icon or using either the close or 
+	 * forceClose methods. <br/>
+	 * If the flag is set to KEEP_OPEN the window can only be closed using the
+	 * forceClose method. In this case the handler will be called.
+	 * 
+	 * 
+	 * @param obj the object to handle the on-close-window event
+	 * @param methodName the method to execute in the object handler class
+	 */
+	public void addOnCloseHandler(Object obj, String methodName){
+		try{
+			closeHandlerObject = obj;
+			closetHandlerMethodName = methodName;
+			closetHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[] {GWindow.class } );
+		} catch (Exception e) {
+			GMessenger.message(NONEXISTANT, new Object[] {this, methodName, new Class<?>[] { GWindow.class } } );
+			closeHandlerObject = null;
+			closetHandlerMethodName = "";
+		}
+	}
+
+	/**
+	 * This method will be called by this windows GWindowCloser object
+	 */
+	void onClose(){
+		if(closeHandlerObject != null){
+			try {
+				closetHandlerMethod.invoke(closeHandlerObject, new Object[] { this } );
+			} catch (Exception e) {
+				GMessenger.message(EXCP_IN_HANDLER,  
+						new Object[] {closeHandlerObject, closetHandlerMethod, e } );
+			}
+		}		
+	}
 
 	/**
 	 * Add an object that holds the data this window needs to use.

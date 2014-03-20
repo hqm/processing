@@ -68,7 +68,7 @@ public void handleButtonEvents(GButton button, GEvent event) {
     if (button == btnItalic)
       txaSample.setSelectedTextStyle(G4P.POSTURE, G4P.POSTURE_OBLIQUE);
     if (button == btnPlain)
-      txaSample.clearStyle();
+      txaSample.clearStyles();
     if (button == btnBold)
       txaSample.setSelectedTextStyle(G4P.WEIGHT, G4P.WEIGHT_BOLD);
     if (button == btnSuper)

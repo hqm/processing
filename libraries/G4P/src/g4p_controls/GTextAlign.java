@@ -23,8 +23,6 @@
 
 package g4p_controls;
 
-import java.awt.Font;
-
 import processing.core.PApplet;
 
 

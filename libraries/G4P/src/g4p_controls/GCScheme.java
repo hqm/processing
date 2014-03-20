@@ -101,11 +101,14 @@ public class GCScheme implements GConstants {
 		else {
 			// User image not provided
 			image = app.loadImage("default_gui_palette.png");
+			// Added to 3.4 to hopefully fix problem with OpenProcessing
+			if(image == null)
+				image = new PImage((new javax.swing.ImageIcon(new GCScheme().getClass().getResource("/data/default_gui_palette.png"))).getImage());
 		}
 		// Now make the palletes
 		palettes = new int[16][16];
 		jpalettes = new Color[16][16];
-		for(int p = 0; p <16; p++)
+		for(int p = 0; p < 16; p++)
 			for(int c = 0; c < 16; c++){
 				int col =  image.get(c * 16 + 8, p * 16 + 8);
 				palettes[p][c] = col;
@@ -127,7 +130,7 @@ public class GCScheme implements GConstants {
 		// Now make the palletes
 		palettes = new int[16][16];
 		jpalettes = new Color[16][16];
-		for(int p = 0; p <16; p++)
+		for(int p = 0; p < 16; p++)
 			for(int c = 0; c < 16; c++){
 				int col =  image.get(c * 16 + 8, p * 16 + 8);
 				palettes[p][c] = col;

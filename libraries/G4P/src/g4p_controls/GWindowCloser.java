@@ -59,6 +59,9 @@ public class GWindowCloser {
 					PApplet wapp = gwindow.papplet;
 					GWindowInfo winfo = G4P.windows.get(wapp);
 					if(winfo != null){
+						// This will the on-close-window event handler to 
+						// be called if it exists
+						gwindow.onClose();
 						winfo.dispose();
 						G4P.windows.remove(wapp);
 						gwindow.dispose();

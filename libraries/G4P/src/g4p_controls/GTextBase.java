@@ -67,7 +67,7 @@ public abstract class GTextBase extends GAbstractControl {
 	public void setText(String text){
 		if(text == null || text.length() == 0 )
 			text = " ";
-		stext = new StyledString(text, (int)width - TPAD2);
+		stext = new StyledString(text, Integer.MAX_VALUE);
 		bufferInvalid = true;
 	}
 	
@@ -132,7 +132,7 @@ public abstract class GTextBase extends GAbstractControl {
 	 * Clear <b>all</b> applied styles from the whole text.
 	 */
 	public void setTextPlain(){
-		stext.clearAllAttributes();
+		stext.clearAttributes();
 		bufferInvalid = true;
 	}
 	
@@ -172,6 +172,14 @@ public abstract class GTextBase extends GAbstractControl {
 		addAttributeImpl(G4P.POSTURE, G4P.POSTURE_OBLIQUE);
 	}
 
+	/**
+	 * Get the text used for this control.
+	 * @return the displayed text without styling
+	 */
+	public StyledString getStyledText(){
+		return stext;
+	}
+	
 	/**
 	 * Get the text used for this control.
 	 * @return the displayed text without styling

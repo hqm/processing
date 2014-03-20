@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
@@ -61,19 +60,19 @@ public class G4P implements GConstants, PConstants {
 	static PApplet sketchApplet = null;
 
 	public static GWindowCloser windowCloser = null;
-	
+
 	/**
 	 * return the pretty version of the library.
 	 */
 	public static String getPrettyVersion() {
-		return "3.3";
+		return "3.4";
 	}
 
 	/**
 	 * return the version of the library used by Processing
 	 */
 	public static String getVersion() {
-		return "15";
+		return "17";
 	}
 
 	static int globalColorScheme = GCScheme.BLUE_SCHEME;
@@ -261,7 +260,7 @@ public class G4P implements GConstants, PConstants {
 	static void markWindowForClosure(GWindow window){
 		windowCloser.addWindow(window);
 	}
-	
+
 	/**
 	 * Used internally to register a control with its applet.
 	 * @param control
@@ -449,7 +448,7 @@ public class G4P implements GConstants, PConstants {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * Get an array of GWindow objects even if minimised or invisible. <br>
 	 * This method never returns null, if there are no open windows the array
@@ -459,6 +458,20 @@ public class G4P implements GConstants, PConstants {
 	public static GWindow[] getOpenWindowsAsArray(){
 		ArrayList<GWindow> list = getOpenWindowsAsList(null);
 		return list.toArray(new GWindow[list.size()]);
+	}
+
+	/**
+	 * Use this to check whether a GWindow window is still open (as far as G4P is concerned).
+	 * @param window the window we are interested in
+	 * @return true if G4P still thinks it is open
+	 */
+	public static boolean isWindowOpen(GWindow window){
+		if(window != null){
+			ArrayList<GWindow> list = getOpenWindowsAsList(null);
+			return list.contains(window);
+		}
+		else
+			return false;
 	}
 	
 	/**
@@ -501,11 +514,11 @@ public class G4P implements GConstants, PConstants {
 				true, 
 				chooser, 
 				new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						lastColor = chooser.getColor();
-					}
-				}, 
-				null);
+			public void actionPerformed(ActionEvent e) {
+				lastColor = chooser.getColor();
+			}
+		}, 
+		null);
 		dialog.setVisible(true);
 		return lastColor.getRGB();
 	}
@@ -522,7 +535,7 @@ public class G4P implements GConstants, PConstants {
 		Frame frame = (sketchApplet == null) ? null : sketchApplet.frame;
 		if (PApplet.platform == MACOSX && PApplet.useNativeSelect != false) {
 			FileDialog fileDialog =
-				new FileDialog(frame, prompt, FileDialog.LOAD);
+					new FileDialog(frame, prompt, FileDialog.LOAD);
 			System.setProperty("apple.awt.fileDialogForDirectories", "true");
 			fileDialog.setVisible(true);
 			System.setProperty("apple.awt.fileDialogForDirectories", "false");
@@ -671,16 +684,16 @@ public class G4P implements GConstants, PConstants {
 	}
 
 	/*
-	 
+
 	Component parentComponent
 	    The first argument to each showXxxDialog method is always the parent component, which must be a 
 	    Frame, a component inside a Frame, or null. If you specify a Frame or Dialog, then the Dialog 
 	    will appear over the center of the Frame and follow the focus behavior of that Frame. If you 
 	    specify a component inside a Frame, then the Dialog will appear over the center of that component 
 	    and will follow the focus behavior of that component's Frame. If you specify null, then the look 
-	    and feel will pick an appropriate position for the dialog � generally the center of the screen � and 
+	    and feel will pick an appropriate position for the dialog generally the center of the screen and 
 	    the Dialog will not necessarily follow the focus behavior of any visible Frame or Dialog.
-	
+
 	    The JOptionPane constructors do not include this argument. Instead, you specify the parent frame 
 	    when you create the JDialog that contains the JOptionPane, and you use the JDialog 
 	    setLocationRelativeTo method to set the dialog position.
@@ -689,9 +702,9 @@ public class G4P implements GConstants, PConstants {
 	    specify a string, which results in the dialog displaying a label with the specified text. You can 
 	    split the message over several lines by putting newline (\n) characters inside the message string. 
 	    For example:
-	
+
 	    "Complete the sentence:\n \"Green eggs and...\""
-	
+
 	String title
 	    The title of the dialog.
 	int optionType
@@ -708,7 +721,7 @@ public class G4P implements GConstants, PConstants {
 	    icons to be displayed by the buttons or non-button components to be added to the button row.
 	Object initialValue
 	    Specifies the default value to be selected.
-	
+
 	You can either let the option pane display its default icon or specify the icon using the message 
 	type or icon argument. By default, an option pane created with showMessageDialog displays the 
 	information icon, one created with showConfirmDialog or showInputDialog displays the question 
@@ -717,16 +730,16 @@ public class G4P implements GConstants, PConstants {
 	To specify a custom icon, use the icon argument. The icon argument takes precedence over the 
 	message type; as long as the icon argument has a non-null value, the dialog displays the 
 	specified icon.
- */
+	 */
 
 	private static String PANE_TEXT_STYLE_MACOS = "<html> <head> <style type=\"text/css\">"+
-    "b { font: 13pt \"Lucida Grande\" } p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
-    "</style> </head> <b>@@TITLE@@</b> <p>@@MESSAGE@@</p>";
-	
+			"b { font: 13pt \"Lucida Grande\" } p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+			"</style> </head> <b>@@TITLE@@</b> <p>@@MESSAGE@@</p>";
+
 	private static String PANE_TEXT_STYLE_OTHER = "<html> <head> <style type=\"text/css\">"+
-    "b { font: 12pt \"Lucida Grande\" } p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
-    "</style> </head> <b>@@MESSAGE@@ </b>";
-	
+			"b { font: 12pt \"Lucida Grande\" } p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+			"</style> </head> <b>@@MESSAGE@@ </b>";
+
 	/**
 	 * Display a simple message dialog window. <br>
 	 * 
@@ -753,7 +766,7 @@ public class G4P implements GConstants, PConstants {
 		}
 		JOptionPane.showMessageDialog(frame, m, title, messageType);
 	}
-	
+
 	/**
 	 * Display a simple message dialog window. <br>
 	 * 
@@ -796,7 +809,7 @@ public class G4P implements GConstants, PConstants {
 		}
 		return JOptionPane.showOptionDialog(frame, m, title, optionType, messageType, null, null, null);
 	}
-	
+
 	/**
 	 * Find the Frame associated with this object.
 	 * 
@@ -813,8 +826,8 @@ public class G4P implements GConstants, PConstants {
 			frame = ((GAbstractControl) owner).getPApplet().frame;
 		return frame;
 	}
-	
-	
 
-	
+
+
+
 }

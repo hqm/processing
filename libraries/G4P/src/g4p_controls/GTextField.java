@@ -68,7 +68,7 @@ public class GTextField extends GEditableTextControl {
 	public GTextField(PApplet theApplet, float p0, float p1, float p2, float p3) {
 		this(theApplet, p0, p1, p2, p3, SCROLLBARS_NONE);
 	}
-	
+
 	/**
 	 * Create a text field with the given scrollbar policy. <br>
 	 * This policy can be one of these <br>
@@ -111,7 +111,7 @@ public class GTextField extends GEditableTextControl {
 				new HSrect(1, tx, ty, tw, th),			// typing area
 				new HSrect(9, 0, 0, width, height)		// control surface
 		};
-		
+
 		G4P.pushStyle();
 		G4P.showMessages = false;
 
@@ -126,11 +126,11 @@ public class GTextField extends GEditableTextControl {
 		}
 		G4P.popStyle();
 		setText("");
-//		z = Z_STICKY;
+		//		z = Z_STICKY;
 		createEventHandler(G4P.sketchApplet, "handleTextEvents", 
 				new Class<?>[]{ GEditableTextControl.class, GEvent.class }, 
 				new String[]{ "textcontrol", "event" } 
-		);
+				);
 		registeredMethods = PRE_METHOD | DRAW_METHOD | MOUSE_METHOD | KEY_METHOD;
 		G4P.addControl(this);
 	}
@@ -160,13 +160,16 @@ public class GTextField extends GEditableTextControl {
 		}
 		bufferInvalid = true;
 	}
-	
+
 	/**
-	 * Set the plain text to be displayed.
-	 * @param text plain text
+	 * Set the text to be displayed.
+	 * 
+	 * @param text
 	 */
 	public void setText(String text){
-		setStyledText(new StyledString(text, wrapWidth));
+		if(text == null)
+			text = "";
+		setStyledText(new StyledString(text, Integer.MAX_VALUE));
 	}
 
 	/**
@@ -179,7 +182,7 @@ public class GTextField extends GEditableTextControl {
 			return;
 		if(stext.insertCharacters(stext.length(), extraText) == 0)
 			return;
-//		text = stext.getPlainText();
+		//		text = stext.getPlainText();
 		LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
 		endTLHI.tli = lines.getLast();
 		endTLHI.thi = endTLHI.tli.layout.getNextRightHit(endTLHI.tli.nbrChars - 1);
@@ -244,7 +247,7 @@ public class GTextField extends GEditableTextControl {
 				keepCursorInView = false;
 		}
 	}
-	
+
 	public void mouseEvent(MouseEvent event){
 		if(!visible  || !enabled || !available) return;
 
@@ -345,7 +348,7 @@ public class GTextField extends GEditableTextControl {
 			validKeyCombo = false;	
 		}
 		calculateCaretPos(endTLHI);
-		
+
 		if(validKeyCombo){
 			if(!shiftDown)				// Not extending selection
 				startTLHI.copyFrom(endTLHI);
@@ -384,8 +387,8 @@ public class GTextField extends GEditableTextControl {
 			fireEvent(this, GEvent.ENTERED);
 			// If we have a tab manager and can tab forward then do so
 			if(tabManager != null && tabManager.nextControl(this)){
-					startTLHI.copyFrom(endTLHI);
-					return;
+				startTLHI.copyFrom(endTLHI);
+				return;
 			}
 		}
 		else if(keyChar == TAB){
@@ -404,7 +407,15 @@ public class GTextField extends GEditableTextControl {
 			adjust++; textChanged = true;
 		}
 	}
-	
+
+	protected boolean changeText(){
+		if(!super.changeText())
+			return false;
+		startTLHI.copyFrom(endTLHI);
+		return true;
+	}
+
+
 	public void draw(){
 		if(!visible) return;
 		updateBuffer();
@@ -436,7 +447,7 @@ public class GTextField extends GEditableTextControl {
 				winApp.line(tx+x_left, ty+Math.max(0, y_top), tx+x_left, ty+Math.min(th, y_bot));
 			}
 		}
-		
+
 		winApp.popMatrix();
 
 		if(children != null){
@@ -461,7 +472,7 @@ public class GTextField extends GEditableTextControl {
 
 			bufferInvalid = false;
 			TextLayoutHitInfo startSelTLHI = null, endSelTLHI = null;
-			
+
 			buffer.beginDraw();
 			// Whole control surface if opaque
 			if(opaque)

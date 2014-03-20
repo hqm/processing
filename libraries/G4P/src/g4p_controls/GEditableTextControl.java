@@ -78,7 +78,7 @@ public abstract class GEditableTextControl extends GTextBase {
 
 	// Stuff to manage text selections
 	protected int endChar = -1, startChar = -1, pos = endChar, nbr = 0, adjust = 0;
-	protected boolean textChanged = false, newline = false, selectionChanged = false;
+	protected boolean textChanged = false, selectionChanged = false;
 
 	/* Is the component enabled to generate mouse and keyboard events */
 	boolean textEditEnabled = true;
@@ -150,7 +150,7 @@ public abstract class GEditableTextControl extends GTextBase {
 			dragging = false;
 			if(stext == null || stext.length() == 0)
 				stext = new StyledString(" ", wrapWidth);
-//			text = stext.getPlainText();
+			//			text = stext.getPlainText();
 			LinkedList<TextLayoutInfo> lines = stext.getLines(buffer.g2);
 			startTLHI = new TextLayoutHitInfo(lines.getFirst(), null);
 			startTLHI.thi = startTLHI.tli.layout.getNextLeftHit(1);
@@ -180,6 +180,20 @@ public abstract class GEditableTextControl extends GTextBase {
 		}
 		bufferInvalid = true;
 	}
+	
+	/**
+	 * @return the wrapWidth
+	 */
+	public int getWrapWidth() {
+		return wrapWidth;
+	}
+
+	/**
+	 * @param wrapWidth the wrapWidth to set
+	 */
+	public void setWrapWidth(int wrapWidth) {
+		this.wrapWidth = wrapWidth;
+	}
 
 	/**
 	 * Get the default text for this control
@@ -204,6 +218,82 @@ public abstract class GEditableTextControl extends GTextBase {
 	public StyledString getStyledText(){
 		return stext;
 	}
+
+	/**
+	 * Adds the text attribute to a range of characters on a particular line. If charEnd
+	 * is past the EOL then the attribute will be applied to the end-of-line.
+	 * 
+	 * @param attr the text attribute to add
+	 * @param value value of the text attribute
+	 * @param lineNo the line number (starts at 0)
+	 * @param charStart the position of the first character to apply the attribute
+	 * @param charEnd the position after the last character to apply the attribute
+	 */
+	public void addStyle(TextAttribute attr, Object value, int charStart, int charEnd){
+		if(stext != null){
+			stext.addAttribute(attr, value, charStart, charEnd);
+			bufferInvalid = true;
+		}
+	}
+
+	/**
+	 * Adds the text attribute to a range of characters on a particular line. If charEnd
+	 * is past the EOL then the attribute will be applied to the end-of-line.
+	 * 
+	 * @param attr the text attribute to add
+	 * @param value value of the text attribute
+	 * @param lineNo the line number (starts at 0)
+	 * @param charStart the position of the first character to apply the attribute
+	 * @param charEnd the position after the last character to apply the attribute
+	 */
+	public void addStyle(TextAttribute attr, Object value){
+		if(stext != null){
+			stext.addAttribute(attr, value);
+			bufferInvalid = true;
+		}
+	}
+
+	/**
+	 * Clears all text attribute from a range of characters starting at position 
+	 * charStart and ending with the character preceding charEnd. 
+	 * 
+	 * 
+	 * @param charStart the position of the first character to apply the attribute
+	 * @param charEnd the position after the last character to apply the attribute
+	 */
+	public void clearStyles(int charStart, int charEnd){
+		if(stext != null) {
+			stext.clearAttributes(charStart, charEnd);
+			bufferInvalid = true;
+		}
+	}
+
+	/**
+	 * Clear all styles from the entire text.
+	 */
+	public void clearStyles(){
+		if(stext != null){
+			stext.clearAttributes();
+			bufferInvalid = true;
+		}
+	}
+
+	/**
+	 * Set the font for this control.
+	 * @param font
+	 */
+	public void setFont(Font font) {
+		if(font != null && font != localFont && buffer != null){
+			localFont = font;
+			buffer.g2.setFont(localFont);
+			stext.getLines(buffer.g2);
+			ptx = pty = 0;
+			setScrollbarValues(ptx, pty);
+			bufferInvalid = true;
+		}
+	}
+
+	//    SELECTED / HIGHLIGHTED TEXT
 
 	/**
 	 * Get the text that has been selected (highlighted) by the user. <br>
@@ -263,10 +353,11 @@ public abstract class GEditableTextControl extends GTextBase {
 			endSelTLHI.thi = endSelTLHI.tli.layout.getNextRightHit(cn-1);
 		bufferInvalid = true;
 	}
+
 	/**
 	 * Clear any styles applied to the selected text.
 	 */
-	public void clearStyle(){
+	public void clearSelectionStyle(){
 		if(!hasSelection())
 			return;
 		TextLayoutHitInfo startSelTLHI;
@@ -295,20 +386,6 @@ public abstract class GEditableTextControl extends GTextBase {
 		bufferInvalid = true;
 	}
 
-	/**
-	 * Set the font for this control.
-	 * @param font
-	 */
-	public void setFont(Font font) {
-		if(font != null && font != localFont && buffer != null){
-			localFont = font;
-			buffer.g2.setFont(localFont);
-			stext.getLines(buffer.g2);
-			ptx = pty = 0;
-			setScrollbarValues(ptx, pty);
-			bufferInvalid = true;
-		}
-	}
 
 	/**
 	 * Used internally to set the scrollbar values as the text changes.
@@ -446,6 +523,14 @@ public abstract class GEditableTextControl extends GTextBase {
 		textEditEnabled = enableTextEdit;
 	}
 
+	/**
+	 * Is this control keyboard enabled
+	 * @return
+	 */
+	public boolean isTextEditEnabled(){
+		return textEditEnabled;
+	}
+	
 	public void keyEvent(KeyEvent e) {
 		if(!visible  || !enabled || !textEditEnabled || !available) return;
 		if(focusIsWith == this && endTLHI != null){
@@ -456,7 +541,6 @@ public abstract class GEditableTextControl extends GTextBase {
 			boolean ctrlDown = e.isControlDown();
 
 			textChanged = false;
-			newline = false;
 			keepCursorInView = true;
 
 			int startPos = pos, startNbr = nbr;
@@ -479,7 +563,7 @@ public abstract class GEditableTextControl extends GTextBase {
 				if(startPos != pos || startNbr != nbr)
 					fireEvent(this, GEvent.SELECTION_CHANGED);
 			}
-
+			// Select either keyPressedProcess or keyTypeProcess. These two methods are overridden in child classes
 			if(keyID == KeyEvent.PRESS) {
 				keyPressedProcess(keyCode, keyChar, shiftDown, ctrlDown);
 				setScrollbarValues(ptx, pty);
@@ -502,7 +586,7 @@ public abstract class GEditableTextControl extends GTextBase {
 
 
 	// Only executed if text has changed
-	protected void changeText(){
+	protected boolean changeText(){
 		TextLayoutInfo tli;
 		TextHitInfo thi = null, thiRight = null;
 
@@ -518,45 +602,48 @@ public abstract class GEditableTextControl extends GTextBase {
 			startTLHI = null;
 			ptx = pty = 0;
 			caretX = caretY = 0;
+			return false;
 		}
-		else {
-			int posInLine = pos - tli.startCharIndex;
+		// We have a text layout so we can do something
+		// First find the position in line
+		int posInLine = pos - tli.startCharIndex;
 
-			// Get some hit info so we can see what is happening
-			try{
-				thiRight = tli.layout.getNextRightHit(posInLine);
-			}
-			catch(Exception excp){
-				thiRight = null;
-			}
-
-			if(posInLine <= 0){					// At start of line
-				thi = tli.layout.getNextLeftHit(thiRight);				
-			}
-			else if(posInLine >= tli.nbrChars){	// End of line
-				thi = tli.layout.getNextRightHit(tli.nbrChars - 1);	
-			}
-			else {								// Character in line;
-				thi = tli.layout.getNextLeftHit(thiRight);	
-			}
-
-			endTLHI.setInfo(tli, thi);
-			// Cursor at end of paragraph graphic
-			calculateCaretPos(endTLHI);
-
-			// Is do we have to move cursor to start of next line
-			if(newline) {    ///stext.getWrapWidth() != Integer.MAX_VALUE && caretX > stext.getWrapWidth()){
-				if(pos >= stext.length()){
-					stext.insertCharacters(pos, " ");
-					stext.getLines(buffer.g2);
-				}
-				moveCaretRight(endTLHI);
-				calculateCaretPos(endTLHI);
-			}
-			// Finish off by ensuring no selection, invalidate buffer etc.
-			startTLHI.copyFrom(endTLHI);
+		// Get some hit info so we can see what is happening
+		try{
+			thiRight = tli.layout.getNextRightHit(posInLine);
 		}
+		catch(Exception excp){
+			thiRight = null;
+		}
+
+		if(posInLine <= 0){					// At start of line
+			thi = tli.layout.getNextLeftHit(thiRight);				
+		}
+		else if(posInLine >= tli.nbrChars){	// End of line
+			thi = tli.layout.getNextRightHit(tli.nbrChars - 1);
+		}
+		else {								// Character in line;
+			thi = tli.layout.getNextLeftHit(thiRight);	
+		}
+
+		endTLHI.setInfo(tli, thi);
+		// Cursor at end of paragraph graphic
+		calculateCaretPos(endTLHI);
+
+//			// Is do we have to move cursor to start of next line
+//			if(newline) {
+//				if(pos >= stext.length()){
+//					stext.insertCharacters(pos, " ");
+//					stext.getLines(buffer.g2);
+//				}
+//				moveCaretRight(endTLHI);
+//				calculateCaretPos(endTLHI);
+//			}
+//			// Finish off by ensuring no selection, invalidate buffer etc.
+//			startTLHI.copyFrom(endTLHI);
+//		}
 		bufferInvalid = true;
+		return true;
 	}
 
 	/**
@@ -652,14 +739,5 @@ public abstract class GEditableTextControl extends GTextBase {
 		bufferInvalid = true;
 		return true;
 	}
-
-	/**
-	 * Setting the styled text depends on whether this is a GTextField 
-	 * or GTextArea object. Either way the stext will be valid after 
-	 * this call so we can restore selection.
-	 * 
-	 * @param ss
-	 */
-	public abstract void setStyledText(StyledString ss);
 
 }

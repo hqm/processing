@@ -209,7 +209,7 @@ public class GDropList extends GTextBase {
 			selItem = selected;
 			startItem = (selItem >= dropListMaxSize) ? selItem - dropListMaxSize + 1 : 0;
 			for(StyledString s : sitems)
-				s.clearAllAttributes();
+				s.clearAttributes();
 			sitems[selItem].addAttribute(WEIGHT, WEIGHT_BOLD);
 			selText = new StyledString(this.items[selItem]);			
 			bufferInvalid = true;

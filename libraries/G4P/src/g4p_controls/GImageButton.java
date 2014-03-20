@@ -229,20 +229,19 @@ public class GImageButton extends GAbstractControl {
 
 	/**
 	 * 
-	 * When a button is clicked on a GButton it generates 3 events (in this order) 
-	 * mouse down, mouse up and mouse clicked. <br>
-	 * You can test for a particular event type with PRESSED, RELEASED: <br>
+	 * When a mouse button is clicked on a GImageButton it generates the GEvent.CLICKED event. If
+	 * you also want the button to generate GEvent.PRESSED and GEvent.RELEASED events
+	 * then you need the following statement.<br>
+	 * <pre>btnName.fireAllEvents(true); </pre><br>
+	 * 
 	 * <pre>
-	 * 	void handleButtonEvents(GButton button) {
-	 *	  if(button == btnName && button.eventType == GButton.PRESSED){
+	 * void handleButtonEvents(void handleButtonEvents(GImageButton button, GEvent event) {
+	 *	  if(button == btnName && event == GEvent.CLICKED){
 	 *        // code for button click event
 	 *    }
 	 * </pre> <br>
-	 * Where <pre><b>btnName</b></pre> is the GButton identifier (variable name) <br><br>
+	 * Where <pre><b>btnName</b></pre> is the GImageButton identifier (variable name) <br><br>
 	 * 
-	 * If you only wish to respond to button click events then use the statement <br>
-	 * <pre>btnName.fireAllEvents(false); </pre><br> 
-	 * This is the default mode.
 	 */
 	public void mouseEvent(MouseEvent event){
 		if(!visible || !enabled || !available) return;
@@ -311,6 +310,18 @@ public class GImageButton extends GAbstractControl {
 	 */
 	public void fireAllEvents(boolean all){
 		reportAllButtonEvents = all;
+	}
+
+	/**
+	 * Enable or disable the ability of the component to generate mouse events.<br>
+	 * If the control is to be disabled when it is clicked then this will force the
+	 * mouse off button image is used.
+	 * @param enable true to enable else false
+	 */
+	public void setEnabled(boolean enable){
+		super.setEnabled(enable);
+		if(!enable)
+			status = OFF_CONTROL;
 	}
 
 }

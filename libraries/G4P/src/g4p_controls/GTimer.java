@@ -115,8 +115,8 @@ public class GTimer implements GConstantsInternal {
 	}
 
 	/**
-	 * See if 'obj' has a parameterless method called 'methodName' and
-	 * if so keep a reference to it.
+	 * See if 'obj' has a method called 'methodName' that has a single parameter of type
+	 * GTimer and  if so keep a reference to it.
 	 * 
 	 * @param obj
 	 * @param methodName
