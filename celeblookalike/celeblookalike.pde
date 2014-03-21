@@ -1,17 +1,22 @@
 import shiffman.box2d.*; //<>// //<>//
 import controlP5.*;
+import java.io.*;
 
 ControlP5 cp5;
 
 DropdownList d1;
 
+int myColor = color(255);
 
+int c1, c2;
 
 import java.util.*;
 
 PImage img;  // Declare variable "a" of type PImage
 
 ArrayList<Face> faces = new ArrayList<Face>();
+
+
 
 Face findFace(String name) {
   for (int i = 0; i<faces.size(); i++) {
@@ -43,39 +48,27 @@ void clearPoints() {
   p4 = new PVector(-100, -100);
 }
 
-
-class Face {
-  Poly3 leftEye = new Poly3();
-  Poly3 rightEye = new Poly3();
-  Poly4 nose = new Poly4();
-  Poly4 mouth = new Poly4();
-  Poly4 face = new Poly4();
-  PImage img;
-
-  String name = "";
-  String filename = "none.jpg";
-  String URL = "www.imdb.com";
-
-
-  public Face() {
+void writeFaces(String pathname) {
+  try
+  {
+    FileOutputStream fileOut =
+      new FileOutputStream(pathname);
+    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+    out.writeObject(faces);
+    out.close();
+    fileOut.close();
+    println("Serialized data is saved in "+pathname);
   }
-  public Face(String name, String filename) {
-    this.name = name;
-    this.filename = filename;
-    img = loadImage(filename);
+  catch(IOException i)
+  {
+    i.printStackTrace();
   }
 }
-class Poly3 {
-  PVector left = new PVector(-100, -100);
-  PVector right = new PVector(-100, -100);
-  PVector center = new PVector(-100, -100);
-}
-class Poly4 {
-  PVector left = new PVector(-100, -100);
-  PVector right = new PVector(-100, -100);
-  PVector top = new PVector(-100, -100);
-  PVector bottom = new PVector(-100, -100);
-}
+
+
+
+
+
 Face face = new Face();
 
 String celebs[] = {
@@ -110,7 +103,18 @@ void setup() {
       ;
 
   customize(d1); // customize the first list
+
+
+  cp5.addButton("saveFaces")
+    .setPosition(200, 80)
+      .setSize(100, 19);
+
+  cp5.addButton("loadFaces")
+    .setPosition(260, 80)
+      .setSize(100, 19);
 }
+
+
 
 void customize(DropdownList ddl) {
   // a convenience function to customize a DropdownList
@@ -209,6 +213,8 @@ void draw() {
     state = State.MATCH;
     p_state = State.P4_1;
     face.face = getPoly4();
+  } 
+  else if (state == State.MATCH) {
   }
   fill(255, 0, 0, 99);
   drawPoly3(face.leftEye);
@@ -316,3 +322,20 @@ void controlEvent(ControlEvent theEvent) {
     println("event from controller : "+theEvent.getController().getValue()+" from "+theEvent.getController());
   }
 }
+
+public void saveFaces(int theValue) {
+  println("a button event from saveFaces: "+theValue);
+
+  writeFaces("/tmp/faceslib.ser");
+  c1 = c2;
+  c2 = color(255, 255, 0);
+}
+
+public void loadFaces(int theValue) {
+  println("a button event from loadFaces: "+theValue);
+
+  loadFaces("/tmp/faceslib.ser");
+  c1 = c2;
+  c2 = color(255, 255, 0);
+}
+
