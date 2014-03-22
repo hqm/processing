@@ -65,6 +65,28 @@ void writeFaces(String pathname) {
   }
 }
 
+void loadFaces(String pathname) {
+  try
+  {
+    FileInputStream fileIn = new FileInputStream(pathname);
+    ObjectInputStream in = new ObjectInputStream(fileIn);
+    faces = (ArrayList<Face>) in.readObject();
+    in.close();
+    fileIn.close();
+  }
+  catch(IOException i)
+  {
+    i.printStackTrace();
+    return;
+  }
+  catch(ClassNotFoundException c)
+  {
+    System.out.println("ArrayList<Face> class not found");
+    c.printStackTrace();
+    return;
+  }
+}
+
 
 
 
@@ -107,11 +129,15 @@ void setup() {
 
   cp5.addButton("saveFaces")
     .setPosition(200, 80)
-      .setSize(100, 19);
+      .setSize(80, 19);
 
   cp5.addButton("loadFaces")
-    .setPosition(260, 80)
-      .setSize(100, 19);
+    .setPosition(300, 80)
+      .setSize(80, 19);
+
+  cp5.addButton("goBack")
+    .setPosition(400, 80)
+      .setSize(80, 19);
 }
 
 
@@ -167,6 +193,9 @@ void mouseClicked() {
     break;
   case P3_0:
     p_state = State.P3_1;
+    break;
+  case P4_0:
+    p_state = State.P4_1;
     break;
   }
 }
@@ -337,5 +366,25 @@ public void loadFaces(int theValue) {
   loadFaces("/tmp/faceslib.ser");
   c1 = c2;
   c2 = color(255, 255, 0);
+}
+public void goBack(int theValue) {
+  switch(state) {
+  case GET_RIGHT_EYE:  
+    state = State.GET_LEFT_EYE;
+    p_state = state.P3_0;
+    break;
+  case GET_NOSE:
+    state = State.GET_RIGHT_EYE;
+    p_state = state.P3_0;
+    break;
+  case GET_MOUTH:
+    state = State.GET_NOSE;
+    p_state = state.P4_0;
+    break;
+  case GET_FACE:
+    state = State.GET_MOUTH;
+    p_state = state.P4_0;
+    break;
+  }
 }
 
